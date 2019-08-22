@@ -7,14 +7,14 @@ Widget::Widget(QWidget *parent) :
 {
     //ui->setupUi(this);
     this->setFixedSize(400,300);
-    this->setWindowTitle(QString::fromLocal8Bit("服务端"));
-    this->move(470,50);
-    this->send_button=new QPushButton(this);
-    this->send_button->resize(100,40);
-    this->send_button->move(this->width()-120,this->height()-100);
-    this->send_button->setText(QString::fromLocal8Bit("发送客户端"));
-    connect(this->send_button,SIGNAL(clicked()),this,SLOT(send_button_slots()));
-    this->send_button->setStyleSheet(QString::fromUtf8("QPushButton\n"
+    this->setWindowTitle(QString::fromLocal8Bit("客户端"));
+    this->move(50,50);
+    this->my_test_button=new QPushButton(this);
+    this->my_test_button->resize(100,40);
+    this->my_test_button->move(this->width()-120,this->height()-100);
+    this->my_test_button->setText(QString::fromLocal8Bit("发送服务器"));
+    connect(this->my_test_button,SIGNAL(clicked()),this,SLOT(my_test_slot()));
+    this->my_test_button->setStyleSheet(QString::fromUtf8("QPushButton\n"
                                                           "{\n"
                                                           "    font-family:Microsoft Yahei;\n"
                                                           "    font:14pt;\n"
@@ -47,9 +47,9 @@ Widget::Widget(QWidget *parent) :
     this->send_edit->resize(250,40);
     this->send_edit->move(20,this->height()-100);
     //定时读取客户端文件内容
-    this->timer_read_service=new QTimer(this);
-    connect(this->timer_read_service,SIGNAL(timeout()),this,SLOT(timer_read_slots()));
-    this->timer_read_service->start(100);
+    this->timer_read_client=new QTimer(this);
+    connect(this->timer_read_client,SIGNAL(timeout()),this,SLOT(timer_read_slots()));
+    this->timer_read_client->start(100);
 }
 
 Widget::~Widget()
@@ -57,11 +57,10 @@ Widget::~Widget()
     delete ui;
 }
 
-//发送事件
-void Widget::send_button_slots()
+void Widget::my_test_slot()
 {
     //qDebug()<<QString::fromLocal8Bit("这是个测试按钮");
-    this->service_file=new QFile("/tmp/client.txt");
+    this->service_file=new QFile("/tmp/service.txt");
     //打开只写文档，换行写入
     if(this->service_file->open(QIODevice::WriteOnly | QIODevice::Text /*| QIODevice::Append*/ ))
     {
@@ -70,13 +69,13 @@ void Widget::send_button_slots()
         if(str3 != NULL)
         {
             //追加文本
-            this->return_edit->appendPlainText(QString::fromLocal8Bit("发送到客户端"));
+            this->return_edit->appendPlainText(QString::fromLocal8Bit("正在写入服务端"));
             this->return_edit->appendPlainText(str3);
             //定位到文件末尾
             QTextStream my_in(this->service_file);
             //my_in.seek(this->service_file->size());
             my_in << str3 << endl;
-            this->return_edit->appendPlainText(QString::fromLocal8Bit("发送完成"));
+            this->return_edit->appendPlainText(QString::fromLocal8Bit("写入完成"));
             this->service_file->close();
         }
         else
@@ -86,11 +85,11 @@ void Widget::send_button_slots()
     }
 }
 
-//定时器，定时读取服务器文件
+//定时读取客户端内容
 void Widget::timer_read_slots()
 {
     //文件操作
-    this->my_file=new QFile("/tmp/service.txt");
+    this->my_file=new QFile("/tmp/client.txt");
     //以只读的形式打开文本文档
     if(this->my_file->open(QIODevice::ReadWrite | QIODevice::Text))
     {
@@ -107,7 +106,7 @@ void Widget::timer_read_slots()
             QString str2(QString::fromLocal8Bit(line));
             str1 =str1+str2;
             //qDebug()<<str2;
-            this->return_edit->appendPlainText(QString::fromLocal8Bit("接收客户端数据"));
+            this->return_edit->appendPlainText(QString::fromLocal8Bit("接收服务器数据"));
             this->return_edit->appendPlainText(str1);
         }
         //清空文件内容
@@ -118,6 +117,6 @@ void Widget::timer_read_slots()
     else
     {
         qDebug()<<QString::fromLocal8Bit("没有找到文件");
-        this->warn_info_label->setText(QString::fromLocal8Bit("链接客户端失败"));
+        this->warn_info_label->setText(QString::fromLocal8Bit("链接服务器失败"));
     }
 }
